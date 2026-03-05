@@ -48,7 +48,7 @@ async function sendOTPEmail(email, otp) {
 
         <!-- Logo -->
        <img 
-      src="https://raw.githubusercontent.com/Tanay09876/Impact-training/main/Untitled%20design%20(3).png"
+      src="https://raw.githubusercontent.com/Tanay09876/E-BOOK/main/frontend/public/images/template-logo.png"
       alt="E-Book Logo"
       style="width:120px;margin-bottom:20px;"
     />
