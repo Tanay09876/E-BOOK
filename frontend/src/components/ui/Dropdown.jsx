@@ -88,7 +88,7 @@ export const DropdownItem = ({ children, onClick, disabled = false }) => {
       className={`w-full text-slate-700 px-4 py-2 text-sm text-left flex items-center gap-2 transition-colors duration-200 ${
         disabled
           ? "opacity-50 cursor-not-allowed"
-          : "hover:bg-slate-100 focus-visible:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500"
+          : "hover:bg-slate-100 focus-visible:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
       }`}
     >
       {children}

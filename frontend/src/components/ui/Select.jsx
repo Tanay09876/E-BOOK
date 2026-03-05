@@ -26,7 +26,7 @@ function Select({ icon: SelectIcon, label, name, options, ...props }) {
         <select
           id={name}
           name={name}
-          className={`appearance-none w-full h-11 bg-white text-gray-900 px-3 py-2 border border-gray-200 rounded-xl transition-all duration-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 ${
+          className={`appearance-none w-full h-11 bg-white text-gray-900 px-3 py-2 border border-gray-200 rounded-xl transition-all duration-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
             SelectIcon ? "pl-10" : ""
           }`}
           {...props}
