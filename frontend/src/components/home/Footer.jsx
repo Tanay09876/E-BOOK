@@ -5,19 +5,19 @@ import LogoIcon from "../LogoIcon";
 
 const socials = [
   {
-    href: "",
+    href: "https://portfolio-nine-wheat-2qj4tsr851.vercel.app/",
     ariaLabel: "Visit my portfolio",
     icon: Globe,
     imgSrc: "",
   },
   {
-    href: "",
+    href: "https://github.com/Tanay09876",
     ariaLabel: "Visit my GitHub",
     icon: null,
     imgSrc: "/social-icons/github.svg",
   },
   {
-    href: "",
+    href: "https://www.linkedin.com/in/tanay-bateriwala-505627222/",
     ariaLabel: "Visit my LinkedIn",
     icon: null,
     imgSrc: "/social-icons/linkedin.svg",
@@ -141,7 +141,7 @@ function Footer() {
                   target="_blank"
                   className="text-white transition-all duration-200 hover:underline focus-visible:underline"
                 >
-                  @xyz
+                  Tanay Bateriwala
                 </a>
                 , for creators
               </span>
