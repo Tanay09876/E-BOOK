@@ -249,6 +249,23 @@ async function deleteBook(req, res) {
   }
 }
 
+async function uploadEditorImageController(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided!" });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+    return res.status(200).json({
+      message: "Image uploaded successfully!",
+      imageUrl,
+    });
+  } catch (error) {
+    console.error("Error uploading editor image:", error);
+    return res.status(500).json({ error: "Internal Server Error!" });
+  }
+}
+
 module.exports = {
   getBooks,
   getBookById,
@@ -256,4 +273,5 @@ module.exports = {
   updateBookContent,
   updateBookCover,
   deleteBook,
+  uploadEditorImageController,
 };

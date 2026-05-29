@@ -63,4 +63,15 @@ const uploadAvatarImage = multer({
   },
 }).single("avatar");
 
-module.exports = { uploadBookCoverImage, uploadAvatarImage };
+const uploadEditorImage = multer({
+  storage: storageEngine,
+  limits: {
+    files: 1,
+    fileSize: 5 * 1024 * 1024, // 5MB limit for editor images
+  },
+  fileFilter(req, file, callback) {
+    checkFileType(file, callback);
+  },
+}).single("image");
+
+module.exports = { uploadBookCoverImage, uploadAvatarImage, uploadEditorImage };

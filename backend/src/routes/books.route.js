@@ -7,8 +7,9 @@ const {
   updateBookContent,
   updateBookCover,
   deleteBook,
+  uploadEditorImageController,
 } = require("../controllers/books.controller");
-const { uploadBookCoverImage } = require("../middlewares/upload.middleware");
+const { uploadBookCoverImage, uploadEditorImage } = require("../middlewares/upload.middleware");
 
 // All routes require authentication
 router.use(authenticate);
@@ -16,6 +17,9 @@ router.use(authenticate);
 // GET /api/books - Get all user's books
 // POST /api/books - Create a new book
 router.route("/").get(getBooks).post(createBook);
+
+// POST /api/books/upload-image - Upload an image from the editor
+router.route("/upload-image").post(uploadEditorImage, uploadEditorImageController);
 
 // GET /api/books/:bookId - Get a specific book
 // PUT /api/books/:bookId - Update book content/metadata

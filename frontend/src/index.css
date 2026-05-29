@@ -109,6 +109,25 @@
     border-radius: 6px !important;
   }
 
+  /* Overrides for child dropdown buttons to keep them from being squished */
+  .w-md-editor-toolbar-child .w-md-editor-toolbar ul li button {
+    height: initial !important;
+    width: 100% !important;
+    min-width: unset !important;
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+  }
+
+  .w-md-editor-toolbar-child .w-md-editor-toolbar ul li button:hover {
+    background-color: #ede9fe !important;
+    color: blue !important;
+    border-radius: 4px !important;
+  }
+
   .w-md-editor-text {
     caret-color: blue !important;
   }
