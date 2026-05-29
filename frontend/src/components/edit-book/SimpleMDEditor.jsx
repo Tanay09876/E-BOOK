@@ -142,12 +142,17 @@ const alignJustify = {
   execute: (state, api) => executeAlignment("justify", state, api),
 };
 
-// Helper to clean formatting tags and prevent double nesting
-const cleanStylingTags = (text) => {
-  return text
-    .replace(/<span\s+style=["']color:\s*(#[a-fA-F0-9]{3,8}|[a-zA-Z]+)["']\s*>([\s\S]*?)<\/span>/gi, "$2")
-    .replace(/<u>([\s\S]*?)<\/u>/gi, "$2")
-    .replace(/<mark>([\s\S]*?)<\/mark>/gi, "$2");
+// Helpers to clean formatting tags and prevent double nesting
+const cleanColorTags = (text) => {
+  return text.replace(/<span\s+style=["']color:\s*(#[a-fA-F0-9]{3,8}|[a-zA-Z]+)["']\s*>([\s\S]*?)<\/span>/gi, "$2");
+};
+
+const cleanUnderlineTags = (text) => {
+  return text.replace(/<u>([\s\S]*?)<\/u>/gi, "$1");
+};
+
+const cleanHighlightTags = (text) => {
+  return text.replace(/<mark>([\s\S]*?)<\/mark>/gi, "$1");
 };
 
 const underline = {
@@ -161,7 +166,7 @@ const underline = {
     if (match) {
       api.replaceSelection(match[1]);
     } else {
-      const cleaned = cleanStylingTags(state.selectedText || "Text");
+      const cleaned = cleanUnderlineTags(state.selectedText || "Text");
       api.replaceSelection(`<u>${cleaned}</u>`);
     }
   },
@@ -178,7 +183,7 @@ const highlight = {
     if (match) {
       api.replaceSelection(match[1]);
     } else {
-      const cleaned = cleanStylingTags(state.selectedText || "Text");
+      const cleaned = cleanHighlightTags(state.selectedText || "Text");
       api.replaceSelection(`<mark>${cleaned}</mark>`);
     }
   },
@@ -192,14 +197,13 @@ const textColor = {
   execute: (state, api) => {
     const selected = (state.selectedText || "").trim();
     const match = selected.match(/^<span\s+style=["']color:\s*(#[a-fA-F0-9]{3,8}|[a-zA-Z]+)["']\s*>([\s\S]*?)<\/span>$/i);
-    if (match) {
-      api.replaceSelection(match[2]);
-      return;
-    }
-    const cleaned = cleanStylingTags(state.selectedText || "Text");
+    
+    // Clean any existing color spans inside the selected text first to prevent nesting colors
+    const cleaned = cleanColorTags(state.selectedText || "Text");
+    
     const picker = document.createElement("input");
     picker.type = "color";
-    picker.value = "#ef4444";
+    picker.value = match ? match[1] : "#ef4444";
     picker.onchange = (e) => {
       const color = e.target.value;
       api.replaceSelection(`<span style="color: ${color}">${cleaned}</span>`);
@@ -218,24 +222,14 @@ const pageBreak = {
   },
 };
 
-const customTable = {
-  name: "custom-table",
-  keyCommand: "custom-table",
-  buttonProps: { "aria-label": "Insert Table", title: "Insert Table" },
-  icon: <Table className="size-4" />,
-  execute: (state, api) => {
-    const colsInput = window.prompt("Enter number of columns (1-10):", "3");
-    if (!colsInput) return;
-    const rowsInput = window.prompt("Enter number of rows (1-20):", "3");
-    if (!rowsInput) return;
+function TablePickerPanel({ close, textApi }) {
+  const [hoveredGrid, setHoveredGrid] = useState({ r: 0, c: 0 });
+  const maxRows = 8;
+  const maxCols = 8;
 
-    const cols = parseInt(colsInput, 10);
-    const rows = parseInt(rowsInput, 10);
-
-    if (isNaN(cols) || isNaN(rows) || cols <= 0 || rows <= 0) {
-      toast.error("Invalid rows or columns count!");
-      return;
-    }
+  const handleSelect = (r, c) => {
+    const cols = c + 1;
+    const rows = r + 1;
 
     const headerRow = "|" + Array(cols).fill(" Header ").join("|") + "|\n";
     const separatorRow = "|" + Array(cols).fill(" --- ").join("|") + "|\n";
@@ -244,7 +238,68 @@ const customTable = {
       bodyRows += "|" + Array(cols).fill(" Cell ").join("|") + "|\n";
     }
 
-    api.replaceSelection(`\n\n${headerRow}${separatorRow}${bodyRows}\n`);
+    textApi.replaceSelection(`\n\n${headerRow}${separatorRow}${bodyRows}\n`);
+    close();
+  };
+
+  return (
+    <div className="p-3 bg-white rounded-lg shadow-xl border border-slate-200 flex flex-col gap-2 min-w-[170px] select-none text-slate-800">
+      <div className="flex items-center justify-between text-xs font-semibold text-slate-500 border-b border-slate-100 pb-1.5">
+        <span>Insert Table</span>
+        <span className="text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded font-mono font-bold">
+          {hoveredGrid.r > 0 && hoveredGrid.c > 0
+            ? `${hoveredGrid.r} × ${hoveredGrid.c}`
+            : "0 × 0"}
+        </span>
+      </div>
+
+      <div
+        className="grid gap-1 p-0.5 bg-slate-50/50 rounded border border-slate-100"
+        style={{
+          gridTemplateColumns: `repeat(${maxCols}, minmax(0, 1fr))`,
+        }}
+        onMouseLeave={() => setHoveredGrid({ r: 0, c: 0 })}
+      >
+        {Array.from({ length: maxRows }).map((_, rIdx) =>
+          Array.from({ length: maxCols }).map((_, cIdx) => {
+            const isHighlighted =
+              hoveredGrid.r > 0 &&
+              hoveredGrid.c > 0 &&
+              rIdx < hoveredGrid.r &&
+              cIdx < hoveredGrid.c;
+            return (
+              <div
+                key={`${rIdx}-${cIdx}`}
+                className={`size-3.5 border rounded-[3px] transition-all duration-75 cursor-pointer ${
+                  isHighlighted
+                    ? "bg-violet-500 border-violet-600 shadow-xs"
+                    : "bg-white border-slate-200 hover:border-slate-400"
+                }`}
+                onMouseEnter={() =>
+                  setHoveredGrid({ r: rIdx + 1, c: cIdx + 1 })
+                }
+                onClick={() => handleSelect(rIdx, cIdx)}
+              />
+            );
+          })
+        )}
+      </div>
+
+      <div className="text-[10px] text-slate-400 text-center font-medium">
+        Hover to select grid, click to insert
+      </div>
+    </div>
+  );
+}
+
+const customTable = {
+  name: "custom-table",
+  groupName: "custom-table",
+  keyCommand: "group",
+  buttonProps: { "aria-label": "Insert Table", title: "Insert Table" },
+  icon: <Table className="size-4" />,
+  children: ({ close, textApi }) => {
+    return <TablePickerPanel close={close} textApi={textApi} />;
   },
 };
 
