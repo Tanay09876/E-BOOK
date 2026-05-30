@@ -1,29 +1,7 @@
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 
-// Path relative to where server.js runs (backend/src)
-// This will create backend/uploads
-const uploadsDirPath = path.join(__dirname, "../../uploads");
-
-// Ensure uploads directory exists
-if (!fs.existsSync(uploadsDirPath)) {
-  fs.mkdirSync(uploadsDirPath, { recursive: true });
-}
-
-const storageEngine = multer.diskStorage({
-  destination(req, file, callback) {
-    callback(null, uploadsDirPath);
-  },
-  filename(req, file, callback) {
-    // generate unique filename: fieldname-timestamp-randomstring.ext
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    callback(
-      null,
-      `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`
-    );
-  },
-});
+const storageEngine = multer.memoryStorage();
 
 function checkFileType(file, callback) {
   const allowedFileTypes = /jpeg|jpg|png|gif|webp/;

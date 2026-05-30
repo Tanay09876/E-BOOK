@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const path = require("path");
 const fs = require("fs");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinary.helper");
 
 /**
  * Get user profile
@@ -110,23 +111,19 @@ async function updateAvatar(req, res) {
     const user = await User.findById(req.user.id);
 
     if (!user) {
-      // Delete uploaded file if user not found
-      fs.unlinkSync(req.file.path);
-
       return res.status(404).json({ error: "User not found!" });
     }
 
-    // Delete old avatar image if it exists
-    if (user.avatar) {
-      const oldImagePath = path.join(__dirname, "../../", user.avatar);
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, "ebook/avatars");
 
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
-      }
+    // Delete old avatar image if it exists in Cloudinary
+    if (user.avatar) {
+      await deleteFromCloudinary(user.avatar);
     }
 
-    // Save relative path from backend root
-    user.avatar = `/uploads/${req.file.filename}`;
+    // Save Cloudinary URL
+    user.avatar = result.secure_url;
     const updatedUser = await user.save();
 
     return res.status(200).json({
@@ -140,12 +137,6 @@ async function updateAvatar(req, res) {
     });
   } catch (error) {
     console.error("Error updating avatar:", error);
-
-    // Clean up uploaded file on error
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
     return res.status(500).json({ error: "Internal Server Error!" });
   }
 }
@@ -169,12 +160,8 @@ async function deleteAvatar(req, res) {
       return res.status(400).json({ error: "No avatar to delete!" });
     }
 
-    // Delete avatar image file
-    const imagePath = path.join(__dirname, "../../", user.avatar);
-
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-    }
+    // Delete avatar from Cloudinary if it exists
+    await deleteFromCloudinary(user.avatar);
 
     user.avatar = "";
     const updatedUser = await user.save();
@@ -190,7 +177,6 @@ async function deleteAvatar(req, res) {
     });
   } catch (error) {
     console.error("Error deleting avatar:", error);
-
     return res.status(500).json({ error: "Internal Server Error!" });
   }
 }

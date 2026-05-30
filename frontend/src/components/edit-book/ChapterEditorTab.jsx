@@ -149,10 +149,10 @@ function ChapterEditorTab({
       </header>
 
       {/* Content area */}
-      <section className="flex-1 overflow-hidden">
-        <div className="h-full bg-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="h-full bg-white">
-            <div className="space-y-4 sm:space-y-6 h-full flex flex-col">
+      <section className="flex-1 md:overflow-hidden">
+        <div className="md:h-full bg-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="md:h-full bg-white">
+            <div className="space-y-4 sm:space-y-6 md:h-full flex flex-col">
               {/* Chapter title input */}
               <div>
                 <Input
@@ -166,9 +166,9 @@ function ChapterEditorTab({
               </div>
 
               {/* Editor/preview area */}
-              <div className="flex-1 min-h-0 overflow-hidden">
+              <div className="flex-1 min-h-0 md:overflow-hidden">
                 {isInPreviewMode ? (
-                  <div className="h-full border border-slate-200 rounded-lg overflow-hidden flex flex-col shadow-sm">
+                  <div className="min-h-[450px] md:h-full border border-slate-200 rounded-lg overflow-hidden flex flex-col shadow-sm">
                     <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 shrink-0">
                       <div className="text-slate-600 text-sm flex items-center gap-2">
                         <Eye className="size-4" />

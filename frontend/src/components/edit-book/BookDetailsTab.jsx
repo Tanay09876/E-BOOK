@@ -11,7 +11,7 @@ function BookDetailsTab({
   onCoverImageUpload,
 }) {
   const coverImageUrl = book.coverImage
-    ? `${API_BASE_URL}${book.coverImage}`.replace(/\\/g, "/")
+    ? (book.coverImage.startsWith("http") ? book.coverImage : `${API_BASE_URL}${book.coverImage}`).replace(/\\/g, "/")
     : null;
 
   return (

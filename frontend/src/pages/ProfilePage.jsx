@@ -28,7 +28,7 @@ function ProfilePage() {
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({ ...prev, name: user.name, email: user.email }));
-      setAvatarPreview(user.avatar ? `${API_BASE_URL}${user.avatar}` : null);
+      setAvatarPreview(user.avatar ? (user.avatar.startsWith("http") ? user.avatar : `${API_BASE_URL}${user.avatar}`) : null);
     }
   }, [user]);
 

@@ -19,7 +19,7 @@ const ProfileMenu = ({
     >
       {avatarUrl ? (
         <img
-          src={`${API_BASE_URL}${avatarUrl}`}
+          src={avatarUrl.startsWith("http") ? avatarUrl : `${API_BASE_URL}${avatarUrl}`}
           alt={`${username}'s avatar`}
           className="size-8 md:size-9 object-cover rounded-xl shrink-0"
         />

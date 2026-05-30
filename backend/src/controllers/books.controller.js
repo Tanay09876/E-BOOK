@@ -1,6 +1,7 @@
 const Book = require("../models/Book");
 const path = require("path");
 const fs = require("fs");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinary.helper");
 
 async function getBooks(req, res) {
   try {
@@ -155,33 +156,26 @@ async function updateBookCover(req, res) {
     const book = await Book.findById(bookId);
 
     if (!book) {
-      // Delete uploaded file if book not found
-      fs.unlinkSync(req.file.path);
-
       return res.status(404).json({ error: "Book not found!" });
     }
 
     // Check authorization
     if (book.userId.toString() !== req.user.id.toString()) {
-      // Delete uploaded file if unauthorized
-      fs.unlinkSync(req.file.path);
-
       return res
         .status(403)
         .json({ error: "Forbidden: You cannot update this book cover!" });
     }
 
-    // Delete old cover image if it exists
-    if (book.coverImage) {
-      const oldImagePath = path.join(__dirname, "../../", book.coverImage);
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, "ebook/covers");
 
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
-      }
+    // Delete old cover image if it exists in Cloudinary
+    if (book.coverImage) {
+      await deleteFromCloudinary(book.coverImage);
     }
 
-    // Save relative path from backend root
-    book.coverImage = `/uploads/${req.file.filename}`;
+    // Save Cloudinary secure URL
+    book.coverImage = result.secure_url;
     const updatedBook = await book.save();
 
     return res.status(200).json({
@@ -190,11 +184,6 @@ async function updateBookCover(req, res) {
     });
   } catch (error) {
     console.error("Error updating book cover image:", error);
-
-    // Clean up uploaded file on error
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
 
     // Handle invalid ObjectId
     if (error.name === "CastError") {
@@ -222,13 +211,9 @@ async function deleteBook(req, res) {
         .json({ error: "Forbidden: You cannot delete this book!" });
     }
 
-    // Delete cover image if it exists
+    // Delete cover image from Cloudinary if it exists
     if (book.coverImage) {
-      const imagePath = path.join(__dirname, "../../", book.coverImage);
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+      await deleteFromCloudinary(book.coverImage);
     }
 
     await book.deleteOne();
@@ -255,10 +240,10 @@ async function uploadEditorImageController(req, res) {
       return res.status(400).json({ error: "No image file provided!" });
     }
 
-    const imageUrl = `/uploads/${req.file.filename}`;
+    const result = await uploadToCloudinary(req.file.buffer, "ebook/editor");
     return res.status(200).json({
       message: "Image uploaded successfully!",
-      imageUrl,
+      imageUrl: result.secure_url,
     });
   } catch (error) {
     console.error("Error uploading editor image:", error);

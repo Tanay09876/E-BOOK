@@ -7,7 +7,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
-import { ArrowLeft, GripVertical, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, GripVertical, Plus, Sparkles, Trash2, X } from "lucide-react";
 
 function SortableItem({
   chapter,
@@ -108,6 +108,7 @@ function ChaptersSidebar({
   isGenerating,
   onGenerateChapterContent,
   onReorderChapters,
+  onClose,
 }) {
   const navigate = useNavigate();
 
@@ -133,17 +134,30 @@ function ChaptersSidebar({
   return (
     <aside className="w-full md:w-80 h-full bg-white border-r border-slate-200 flex flex-col shadow-sm">
       {/* Header */}
-      <header className="border-b border-slate-200 p-4 bg-slate-50">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/dashboard")}
-          icon={ArrowLeft}
-          className="hover:bg-slate-100"
-        >
-          Back to Dashboard
-        </Button>
+      <header className="border-b border-slate-200 p-4 bg-slate-50 relative">
+        <div className="flex justify-between items-center gap-x-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            icon={ArrowLeft}
+            className="hover:bg-slate-100"
+          >
+            Back to Dashboard
+          </Button>
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close sidebar"
+              className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 md:hidden"
+            >
+              <X className="size-5" />
+            </button>
+          )}
+        </div>
 
         <div className="mt-4">
           <h2

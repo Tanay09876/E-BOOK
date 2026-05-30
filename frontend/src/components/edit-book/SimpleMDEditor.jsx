@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   TypeOutline,
   AlignLeft,
@@ -460,11 +460,53 @@ function SimpleMDEditor({ value, onChange, options }) {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  const editorCommands = useMemo(() => {
+    if (!isLargeScreen) {
+      // Mobile & Tablet core commands
+      return [
+        commands.bold,
+        commands.italic,
+        headingDropdown,
+        commands.link,
+        imageUpload,
+        commands.unorderedListCommand,
+        commands.orderedListCommand,
+      ];
+    }
+    // Full desktop commands
+    return [
+      commands.bold,
+      commands.italic,
+      commands.strikethrough,
+      underline,
+      highlight,
+      textColor,
+      commands.hr,
+      pageBreak,
+      headingDropdown,
+      commands.divider,
+      commands.link,
+      commands.code,
+      commands.codeBlock,
+      imageUpload,
+      customTable,
+      commands.divider,
+      alignLeft,
+      alignCenter,
+      alignRight,
+      alignJustify,
+      commands.divider,
+      commands.unorderedListCommand,
+      commands.orderedListCommand,
+      commands.checkedListCommand,
+    ];
+  }, [isLargeScreen]);
+
   const editorMode = isLargeScreen ? "live" : "edit";
 
   return (
     <div
-      className="border border-slate-200 rounded-lg shadow-sm overflow-hidden h-full flex flex-col"
+      className="border border-slate-200 rounded-lg shadow-sm md:overflow-hidden md:h-full flex flex-col"
       data-color-mode="light"
     >
       <header className="bg-slate-50 border-b border-slate-200 px-3 sm:px-4 py-2.5 shrink-0">
@@ -481,42 +523,17 @@ function SimpleMDEditor({ value, onChange, options }) {
       </header>
 
       {/* Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 md:overflow-hidden">
         <MDEditor
           value={value}
           onChange={onChange}
-          height="100%"
+          height={isLargeScreen ? "100%" : 450}
           preview={editorMode}
           {...options}
           previewOptions={{
             rehypePlugins: [[rehypeSanitize, customSanitizeSchema]],
           }}
-          commands={[
-            commands.bold,
-            commands.italic,
-            commands.strikethrough,
-            underline,
-            highlight,
-            textColor,
-            commands.hr,
-            pageBreak,
-            headingDropdown,
-            commands.divider,
-            commands.link,
-            commands.code,
-            commands.codeBlock,
-            imageUpload,
-            customTable,
-            commands.divider,
-            alignLeft,
-            alignCenter,
-            alignRight,
-            alignJustify,
-            commands.divider,
-            commands.unorderedListCommand,
-            commands.orderedListCommand,
-            commands.checkedListCommand,
-          ]}
+          commands={editorCommands}
           textareaProps={{
             placeholder:
               "Start writing your chapter content here...\n\nUse the toolbar icons to insert tables, align text, upload images, colorize/highlight text, or add page breaks.",

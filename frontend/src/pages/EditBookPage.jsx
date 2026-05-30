@@ -130,6 +130,12 @@ function EditBookPage() {
       return;
     }
 
+    // Client-side file size check (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size must be less than 2MB!", { duration: 5000 });
+      return;
+    }
+
     const formData = new FormData();
     formData.append("coverImage", file);
     setIsUploading(true);
@@ -146,7 +152,11 @@ function EditBookPage() {
       toast.success("Cover image updated successfully!");
     } catch (error) {
       console.error("Error uploading cover image:", error);
-      toast.error("Failed to upload cover image! Please try again.", {
+      const errorMessage =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Failed to upload cover image! Please try again.";
+      toast.error(errorMessage, {
         duration: 5000,
       });
     } finally {
@@ -261,7 +271,7 @@ function EditBookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-display flex relative">
+    <div className="min-h-screen md:h-screen bg-slate-50 font-display flex flex-col md:flex-row md:overflow-hidden relative">
       {/* Mobile sidebar */}
       {isSidebarOpen && (
         <aside
@@ -277,17 +287,6 @@ function EditBookPage() {
           />
 
           <nav className="flex-1 w-full max-w-xs bg-white flex flex-col relative">
-            <div className="pt-2 -mr-12 absolute top-0 right-0">
-              <button
-                type="button"
-                aria-label="Close sidebar"
-                onClick={() => setIsSidebarOpen(false)}
-                className="size-10 rounded-full ml-1 flex justify-center items-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white hover:bg-white/10 transition-colors"
-              >
-                <X className="size-6 text-white" />
-              </button>
-            </div>
-
             <ChaptersSidebar
               book={book}
               selectedChapterIndex={selectedChapterIndex}
@@ -300,6 +299,7 @@ function EditBookPage() {
               isGenerating={isGenerating}
               onGenerateChapterContent={handleGenerateChapterContent}
               onReorderChapters={handleReorderChapters}
+              onClose={() => setIsSidebarOpen(false)}
             />
           </nav>
 
@@ -324,7 +324,7 @@ function EditBookPage() {
         />
       </aside>
 
-      <main className="flex-1 h-full flex flex-col">
+      <main className="flex-1 md:h-full flex flex-col min-w-0 md:overflow-hidden">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-3 sm:p-4 flex justify-between items-center sticky top-0 z-10">
           <div className="flex items-center gap-2">
@@ -338,7 +338,7 @@ function EditBookPage() {
             </button>
 
             {/* Tab switcher */}
-            <nav className="hidden sm:flex items-center gap-x-1 bg-slate-100 rounded-lg p-1">
+            <nav className="flex items-center gap-x-1 bg-slate-100 rounded-lg p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab("editor")}
@@ -412,7 +412,7 @@ function EditBookPage() {
         </header>
 
         {/* Content area */}
-        <section className="w-full flex-1 overflow-hidden">
+        <section className={`w-full flex-1 ${activeTab === "editor" ? "md:overflow-hidden" : "overflow-y-auto"}`}>
           {activeTab === "editor" ? (
             <ChapterEditorTab
               book={book}

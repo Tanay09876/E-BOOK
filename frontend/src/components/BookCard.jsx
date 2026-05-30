@@ -8,7 +8,7 @@ function BookCard({ book, onDelete }) {
   const { _id, title, subtitle, coverImage } = book;
 
   const coverImageUrl = coverImage
-    ? `${API_BASE_URL}${coverImage}`.replace(/\\/g, "/")
+    ? (coverImage.startsWith("http") ? coverImage : `${API_BASE_URL}${coverImage}`).replace(/\\/g, "/")
     : "/images/default-book-cover.png";
 
   return (
