@@ -92,7 +92,8 @@ async function forgotPassword(req, res) {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -105,12 +106,12 @@ async function forgotPassword(req, res) {
 
     await user.save();
 
-    await sendOTPEmail(email, otp);
+    await sendOTPEmail(cleanEmail, otp);
 
     res.json({ message: "OTP sent to email" });
 
   } catch (error) {
-    console.error(error);
+    console.error("Error in forgotPassword:", error);
     res.status(500).json({ error: "Server error" });
   }
 }
@@ -119,9 +120,16 @@ async function verifyOTP(req, res) {
   try {
     const { email, otp } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
 
-    if (!user || user.otp !== otp) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = otp.toString().trim();
+
+    const user = await User.findOne({ email: cleanEmail });
+
+    if (!user || user.otp !== cleanOtp) {
       return res.status(400).json({ error: "Invalid OTP" });
     }
 
@@ -132,6 +140,7 @@ async function verifyOTP(req, res) {
     res.json({ message: "OTP verified" });
 
   } catch (error) {
+    console.error("Error in verifyOTP:", error);
     res.status(500).json({ error: "Server error" });
   }
 }
@@ -141,7 +150,12 @@ async function resetPassword(req, res) {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password");
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail }).select("+password");
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
