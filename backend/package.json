@@ -5,8 +5,8 @@
   "type": "commonjs",
   "main": "./src/server.js",
   "scripts": {
-    "start": "node ./src/server.js",
-    "dev": "node --env-file=.env --watch ./src/server.js"
+    "start": "node --no-warnings ./src/server.js",
+    "dev": "node --env-file=.env --no-warnings --watch ./src/server.js"
   },
   "keywords": [],
   "author": "Tanay Bateriwala",
